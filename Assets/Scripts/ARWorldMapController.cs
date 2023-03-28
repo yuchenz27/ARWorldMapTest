@@ -142,6 +142,7 @@ public class ARWorldMapController : MonoBehaviour
     {
         _mapScroll.SetActive(false);
 
+        StartCoroutine(Load(filePath));
     }
 
     private void DeleteWorldMap(string filePath)
@@ -157,5 +158,69 @@ public class ARWorldMapController : MonoBehaviour
         }
 
         QueryMaps();
+    }
+
+    private IEnumerator Load(string path)
+    {
+        var sessionSubsystem = (ARKitSessionSubsystem)_arSession.subsystem;
+        if (sessionSubsystem == null)
+        {
+            Debug.Log("No session subsystem available. Could not load.");
+            yield break;
+        }
+
+        FileStream file;
+        try
+        {
+            file = File.Open(path, FileMode.Open);
+        }
+        catch (FileNotFoundException)
+        {
+            Debug.LogError("No ARWorldMap was found. Make sure to save the ARWorldMap before attempting to load it.");
+            yield break;
+        }
+
+        Debug.Log($"Reading {path}...");
+
+        const int bytesPerFrame = 1024 * 10;
+        var bytesRemaining = file.Length;
+        var binaryReader = new BinaryReader(file);
+        var allBytes = new List<byte>();
+        while (bytesRemaining > 0)
+        {
+            var bytes = binaryReader.ReadBytes(bytesPerFrame);
+            allBytes.AddRange(bytes);
+            bytesRemaining -= bytesPerFrame;
+            yield return null;
+        }
+
+        var data = new NativeArray<byte>(allBytes.Count, Allocator.Temp);
+        data.CopyFrom(allBytes.ToArray());
+
+        Debug.Log("Deserializing to ARWorldMap...");
+        if (ARWorldMap.TryDeserialize(data, out ARWorldMap worldMap))
+            data.Dispose();
+
+        if (worldMap.valid)
+        {
+            Debug.Log("Deserialized successfully.");
+        }
+        else
+        {
+            Debug.LogError("Data is not a valid ARWorldMap.");
+
+            _promptText.text = $"Data is not a valid ARWorldMap";
+            _promptWindow.SetActive(true);
+            StartCoroutine(PromptWindowFadeOut());
+
+            yield break;
+        }
+
+        Debug.Log("Apply ARWorldMap to current session.");
+        sessionSubsystem.ApplyWorldMap(worldMap);
+
+        _promptText.text = $"ARWorldMap successfully loaded";
+        _promptWindow.SetActive(true);
+        StartCoroutine(PromptWindowFadeOut());
     }
 }

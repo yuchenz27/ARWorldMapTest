@@ -142,6 +142,13 @@ public class ARWorldMapController : MonoBehaviour
     {
         _mapScroll.SetActive(false);
 
+        // Destroy all existing ARAnchors
+        var anchors = FindObjectsOfType<ARAnchorPrefab>();
+        foreach (var anchor in anchors)
+        {
+            Destroy(anchor.gameObject);
+        }
+
         StartCoroutine(Load(filePath));
     }
 

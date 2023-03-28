@@ -14,6 +14,8 @@ public class ARTapToPlaceObject : MonoBehaviour
 
     [SerializeField] private ARRaycastManager _arRaycastManager;
 
+    [SerializeField] private ARAnchorManager _arAnchorManager;
+
     private Pose _placementPose;
     private bool _placementPoseIsValid = false;
 
@@ -33,7 +35,8 @@ public class ARTapToPlaceObject : MonoBehaviour
 
     private void PlaceObjectInternal()
     {
-        Instantiate(ObjectToPlace, _placementPose.position, _placementPose.rotation);
+        //Instantiate(ObjectToPlace, _placementPose.position, _placementPose.rotation);
+        _arAnchorManager.AddAnchor(new Pose(_placementPose.position, _placementPose.rotation));
     }
 
     private void UpdatePlacementIndicator()

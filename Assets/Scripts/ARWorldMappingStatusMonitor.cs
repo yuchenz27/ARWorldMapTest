@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARKit;
 using UnityEngine.XR.ARFoundation;
+using TMPro;
 
 public class ARWorldMappingStatusMonitor : MonoBehaviour
 {
     [SerializeField] private ARSession _arSession;
+
+    [SerializeField] private TMP_Text _text;
 
     private void Update()
     {
@@ -18,6 +21,6 @@ public class ARWorldMappingStatusMonitor : MonoBehaviour
             return;
 
         ARWorldMappingStatus currentStatus = sessionSubsystem.worldMappingStatus;
-        Debug.Log($"Current status: {currentStatus}");
+        _text.text = $"Mapping Status: {currentStatus}";
     }
 }

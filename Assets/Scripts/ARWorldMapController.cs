@@ -138,14 +138,24 @@ public class ARWorldMapController : MonoBehaviour
         }
     }
 
-    private void LoadWorldMap(string file)
+    private void LoadWorldMap(string filePath)
     {
         _mapScroll.SetActive(false);
 
     }
 
-    private void DeleteWorldMap(string file)
+    private void DeleteWorldMap(string filePath)
     {
+        if (File.Exists(filePath))
+        {
+            File.Delete(filePath);
+            Debug.Log("File deleted.");
+        }
+        else
+        {
+            Debug.Log("File does not exist.");
+        }
 
+        QueryMaps();
     }
 }
